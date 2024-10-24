@@ -1,0 +1,154 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to check if a page is present in the frame
+int isPagePresent(int frame[], int f, int page) {
+    for (int i = 0; i < f; i++) {
+        if (frame[i] == page)
+            return 1;
+    }
+    return 0;
+}
+
+// Function for FIFO page replacement
+void fifo(int pages[], int n, int f) {
+    int *frame = (int *)malloc(f * sizeof(int));
+    int front = 0, faults = 0;
+
+    for (int i = 0; i < f; i++) {
+        frame[i] = -1; // Initialize frames as empty
+    }
+
+    printf("\nFIFO Page Replacement\n");
+    printf("Page\tFrames\n");
+
+    for (int i = 0; i < n; i++) {
+        if (!isPagePresent(frame, f, pages[i])) {  
+            frame[front] = pages[i];
+            front = (front + 1) % f;
+            faults++;
+        }
+
+        printf("%d\t", pages[i]);
+        for (int j = 0; j < f; j++) {
+            if (frame[j] != -1)
+                printf("%d ", frame[j]);
+            else
+                printf("- ");
+        }
+        printf("\n");
+    }
+
+    printf("\nTotal Page Faults: %d\n", faults);
+    free(frame);
+}
+
+// Function to find the optimal page to replace
+int findOptimal(int pages[], int frame[], int f, int n, int currentIndex) {
+    int *pos = (int *)malloc(f * sizeof(int));
+    int farthest = currentIndex, replacementIndex = -1;
+
+    for (int i = 0; i < f; i++) {
+        pos[i] = -1;
+        for (int j = currentIndex + 1; j < n; j++) {
+            if (frame[i] == pages[j]) {
+                pos[i] = j;
+                break;
+            }
+        }
+
+        if (pos[i] == -1) {
+            free(pos);
+            return i;
+        }
+    }
+
+    for (int i = 0; i < f; i++) {
+        if (pos[i] > farthest) {
+            farthest = pos[i];
+            replacementIndex = i;
+        }
+    }
+
+    free(pos);
+    return replacementIndex;
+}
+
+// Function for Optimal page replacement
+void optimal(int pages[], int n, int f) {
+    int *frame = (int *)malloc(f * sizeof(int));
+    int faults = 0;
+
+    for (int i = 0; i < f; i++) {
+        frame[i] = -1; 
+    }
+
+    printf("\nOptimal Page Replacement\n");
+    printf("Page\tFrames\n");
+
+    for (int i = 0; i < n; i++) {
+        if (!isPagePresent(frame, f, pages[i])) {  
+            if (i < f) {
+                frame[i] = pages[i];  
+            } else {
+                int replacementIndex = findOptimal(pages, frame, f, n, i);
+                frame[replacementIndex] = pages[i];
+            }
+            faults++;
+        }
+
+        printf("%d\t", pages[i]);
+        for (int j = 0; j < f; j++) {
+            if (frame[j] != -1)
+                printf("%d ", frame[j]);
+            else
+                printf("- ");
+        }
+        printf("\n");
+    }
+
+    printf("\nTotal Page Faults: %d\n", faults);
+    free(frame);
+}
+
+int main() {
+    int *pages, n, f, choice;
+
+    printf("Enter the number of pages: ");
+    scanf("%d", &n);
+
+    pages = (int *)malloc(n * sizeof(int));
+    printf("Enter the reference string (page numbers):\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    printf("Enter the number of frames: ");
+    scanf("%d", &f);
+
+    while (1) {
+        printf("\nPage Replacement Algorithms Menu:\n");
+        printf("1. FIFO\n");
+        printf("2. Optimal\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                fifo(pages, n, f);
+                break;
+            case 2:
+                optimal(pages, n, f);
+                break;
+            case 3:
+                printf("Exiting program...\n");
+                free(pages);
+                exit(0);
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+    }
+
+    return 0;
+}

@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+    int n;  // Number of processes
+    int burstTime[20], arrivalTime[20], remainingTime[20], completionTime[20];
+    int waitingTime[20], turnaroundTime[20];
+    int currentTime = 0, completedProcesses = 0;
+    int shortest = 0, minRemainingTime = INT_MAX;
+    int isProcessRunning = 0, startTime = 0;
+    float totalWaitingTime = 0, totalTurnaroundTime = 0;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    printf("Enter arrival time and burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d arrival time: ", i + 1);
+        scanf("%d", &arrivalTime[i]);
+        printf("Process %d burst time: ", i + 1);
+        scanf("%d", &burstTime[i]);
+        remainingTime[i] = burstTime[i];  // Initialize remaining time to burst time
+    }
+
+    // While all processes are not completed
+    while (completedProcesses < n) {
+        // Find process with the minimum remaining time among the arrived processes
+        for (int i = 0; i < n; i++) {
+            if (arrivalTime[i] <= currentTime && remainingTime[i] > 0 && remainingTime[i] < minRemainingTime) {
+                minRemainingTime = remainingTime[i];
+                shortest = i;
+                isProcessRunning = 1;
+            }
+        }
+
+        if (isProcessRunning == 0) {
+            currentTime++;
+            continue; // If no process is running, increase time and skip the rest of the loop
+        }
+
+        // Execute the process for 1 time unit (preemption occurs after each unit)
+        remainingTime[shortest]--;
+        currentTime++;
+
+        // If process is finished
+        if (remainingTime[shortest] == 0) {
+            completionTime[shortest] = currentTime;
+            turnaroundTime[shortest] = completionTime[shortest] - arrivalTime[shortest];
+            waitingTime[shortest] = turnaroundTime[shortest] - burstTime[shortest];
+
+            totalWaitingTime += waitingTime[shortest];
+            totalTurnaroundTime += turnaroundTime[shortest];
+
+            completedProcesses++; // Increment the count of completed processes
+            minRemainingTime = INT_MAX; // Reset the minimum remaining time for the next process
+            isProcessRunning = 0; // No process is currently running
+        }
+    }
+
+    // Print results
+    printf("\nPID\tArrival\tBurst\tCompletion\tTurnaround\tWaiting\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t\t%d\t\t%d\n", i + 1, arrivalTime[i], burstTime[i], completionTime[i], turnaroundTime[i], waitingTime[i]);
+    }
+
+    // Print average waiting and turnaround times
+    printf("\nAverage waiting time: %.2f", totalWaitingTime / n);
+    printf("\nAverage turnaround time: %.2f\n", totalTurnaroundTime / n);
+
+    return 0;
+}

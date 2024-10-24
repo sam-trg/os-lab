@@ -1,0 +1,107 @@
+PRIORITY
+
+
+#include <stdio.h>
+void bubblesort(int arr[]) {
+    int n=5;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j+1] < arr[j + 2]) {
+                
+                int temp = arr[j+1];
+                arr[j+1] = arr[j + 2];
+                arr[j + 2] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+  int at[6];
+  int bt[6];
+  int ct[6];
+  int tat[6];
+  int wt[6];
+  int bbt[50];
+  int pri[6];
+  int pp[6];
+  int i=0,sum=0,avg=0,avg1=0;
+  int q=3;
+  printf("enter number of process");
+  int p;
+  scanf("%d", &p);
+  printf("Enter arrival time: ");
+  for(int i = 0; i < p; ++i) {
+     scanf("%d", &at[i]);
+  }
+  printf("Enter burst time: ");
+  for(int i = 0; i < p; ++i) {
+     scanf("%d", &bt[i]);
+  }
+  printf("Enter priority: ");
+  for(int i = 0; i < p; ++i) {
+     scanf("%d", &pri[i]);
+  }
+  for(i=0;i<p;i++)
+  {
+      pp[i]=pri[i];
+  }
+  bubblesort(pp);
+  int c=0;
+  for(i=0;i<p;i++)
+  {
+      for(int j=0;j<p;j++){
+      if(pp[i]==pri[j])
+      {
+          c=j;
+          bbt[i]=bt[c];
+      }
+      }
+  }
+  
+  //ct[0]=bt[0];
+  /*int c=0;
+  int maxi=pri[0];
+  for(i=0;i<p;i++){
+      bbt[0]=bt[0];
+  for(int j=0;j<p;j++)
+{
+    if(pri[j+1]>maxi)
+    {
+        maxi=pri[j+1];
+        c=j+1;
+    }
+    bbt[i]=bt[c];
+    
+}
+
+}*/
+  // bubblesort(bbt);
+   
+for(i=0;i<p;i++)
+{
+    sum=sum+bbt[i];
+    ct[i]=sum;
+}
+for(i=0;i<p;i++)
+{
+    tat[i]=ct[i]-at[i];
+    avg+=tat[i];
+}
+for(i=0;i<p;i++)
+{
+    wt[i]=tat[i]-bt[i];
+    avg1+=wt[i];
+}
+float aw=0,att=0;
+aw=(float)(avg1/p);
+att=(float)(avg/p);
+printf("aver waiting %f",aw);
+printf("aver tat %f",att);
+
+
+  /*for(int i = 0; i < 5; ++i) {
+     printf("%d\n", values[i]);
+  }*/
+  return 0;
+}

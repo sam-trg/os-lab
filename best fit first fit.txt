@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Hole {
+    int size;       // Size of the hole
+    int allocated;  // 1 if allocated, 0 otherwise
+};
+
+struct Process {
+    int size;       // Memory requirement of the process
+    int allocated;  // 1 if allocated, 0 otherwise
+    int holeIndex;  // Index of the allocated hole
+};
+
+// Function for First Fit Allocation
+void firstFit(struct Hole holes[], int nh, struct Process processes[], int np) {
+    for (int i = 0; i < np; i++) {
+        processes[i].allocated = 0; // Mark process as unallocated
+        for (int j = 0; j < nh; j++) {
+            if (holes[j].size >= processes[i].size && holes[j].allocated == 0) {
+                processes[i].allocated = 1; // Mark process as allocated
+                processes[i].holeIndex = j; // Save the hole index
+                holes[j].size -= processes[i].size; // Decrement hole size
+                holes[j].allocated = (holes[j].size == 0); // Mark hole as allocated if fully allocated
+                break; // Stop searching once allocated
+            }
+        }
+    }
+}
+
+// Function for Best Fit Allocation
+void bestFit(struct Hole holes[], int nh, struct Process processes[], int np) {
+    // Sort holes based on size (ascending)
+    for (int i = 0; i < nh - 1; i++) {
+        for (int j = i + 1; j < nh; j++) {
+            if (holes[i].size > holes[j].size) {
+                struct Hole temp = holes[i];
+                holes[i] = holes[j];
+                holes[j] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < np; i++) {
+        processes[i].allocated = 0; // Mark process as unallocated
+        for (int j = 0; j < nh; j++) {
+		 if (holes[j].size >= processes[i].size && holes[j].allocated == 0) {
+                processes[i].allocated = 1; // Mark process as allocated
+                processes[i].holeIndex = j; // Save the hole index
+                holes[j].size -= processes[i].size; // Decrement hole size
+                holes[j].allocated = (holes[j].size == 0); // Mark hole as allocated if fully allocated
+                break; // Stop searching once allocated
+            }
+        }
+    }
+}
+
+// Function to print the results
+void printResults(struct Process processes[], int np, struct Hole holes[], int nh) {
+    printf("\nProcess Allocation:\n");
+    for (int i = 0; i < np; i++) {
+        if (processes[i].allocated) {
+            printf("Process %d allocated to Hole %d\n", i + 1, processes[i].holeIndex + 1);
+        } else {
+            printf("Process %d not allocated\n", i + 1);
+        }
+    }
+
+    printf("\nHoles Status:\n");
+    for (int i = 0; i < nh; i++) {
+        printf("Hole %d - Size: %d, Available: %d\n", i + 1, holes[i].size, holes[i].allocated ? 0 : holes[i].size);
+    }
+}
+
+int main() {
+    int nh, np;
+
+    // Get number of holes
+    printf("Enter the number of holes: ");
+    scanf("%d", &nh);
+    struct Hole *holes = (struct Hole *)malloc(nh * sizeof(struct Hole));
+
+    // Get sizes of holes
+    printf("Enter the sizes of the holes:\n");
+    for (int i = 0; i < nh; i++) {
+        printf("Hole %d: ", i + 1);
+        scanf("%d", &holes[i].size);
+        holes[i].allocated = 0; // Initialize allocation status
+    }
+     printf("Enter the number of processes: ");
+    scanf("%d", &np);
+    struct Process *processes = (struct Process *)malloc(np * sizeof(struct Process));
+
+    // Get memory requirements for each process
+    printf("Enter the memory requirements for each process:\n");
+    for (int i = 0; i < np; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d", &processes[i].size);
+        processes[i].allocated = 0; // Initialize allocation status
+    }
+
+    // First Fit Allocation
+    firstFit(holes, nh, processes, np);
+    printResults(processes, np, holes, nh);
+
+    // Reset holes for Best Fit allocation
+    for (int i = 0; i < nh; i++) {
+        holes[i].allocated = 0; // Reset allocation status
+    }
+
+    // Best Fit Allocation
+    bestFit(holes, nh, processes, np);
+    printResults(processes, np, holes, nh);
+
+    // Free allocated memory
+    free(holes);
+    free(processes);
+    return 0;
+}
+
+                    
